@@ -1,0 +1,34 @@
+# ArgoCD Application для myapp (backend + frontend + ingress). Управляется декларативно:
+# любой коммит в этот gitops-репо → ArgoCD синкает кластер.
+#
+# postgres здесь НЕТ — он ставится вручную helm install (см. README, решение грилла 9).
+#
+# ЗАПОЛНИ: repoURL (HTTPS-адрес ТВОЕГО ПУБЛИЧНОГО gitops-репо).
+# Репо публичный (секреты зашифрованы SOPS) — ArgoCD читает его по HTTPS без ключей.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: myapp
+  namespace: argocd            # namespace самого ArgoCD (всегда argocd)
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  destination:
+    name: in-cluster           # тот же кластер, где стоит ArgoCD
+    namespace: default         # namespace приложения
+  source:
+    repoURL: "https://github.com/ВАШ_ЛОГИН/devops-gitops.git"
+    targetRevision: HEAD
+    path: "helm/myapp"
+    helm:
+      valueFiles:
+        - values.yaml
+        - values-production.yaml
+        - secrets.yaml          # зашифрован SOPS; helm-secrets в repoServer расшифрует
+  project: default
+  syncPolicy:
+    automated:
+      prune: true              # удалять из кластера то, что исчезло из git
+      selfHeal: true           # откатывать ручные kubectl-правки к состоянию git
+    syncOptions:
+      - CreateNamespace=true

@@ -1,0 +1,11 @@
+# Несекретная конфигурация backend. Цикл по envs.configMap — добавить переменную
+# теперь можно только в values.yaml, не трогая шаблон (универсальный стиль, урок 04).
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backend-config
+  namespace: {{ .Values.namespace }}
+data:
+  {{- range $k, $v := .Values.envs.configMap }}
+  {{ $k }}: "{{ $v }}"
+  {{- end }}

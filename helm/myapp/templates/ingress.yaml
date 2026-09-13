@@ -1,0 +1,40 @@
+# Единая точка входа. /api → backend (со срезанием префикса), / → frontend.
+#
+# Тонкость: у backend НЕТ префикса /api (роуты в корне: /todos, /health, /ready,
+# /metrics, /test/reset). rewrite-target /$2 + regex-группы срезают /api:
+#   path /api(/|$)(.*)  → $2 = всё после /api → /todos, /health ...
+#   path /()(.*)        → $2 = весь путь → фронт (identity)
+# От корректности rewrite напрямую зависит зелёный make e2e-deployed.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: app-ingress
+  namespace: {{ .Values.namespace }}
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+    cert-manager.io/cluster-issuer: {{ .Values.ingress.clusterIssuer }}
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - {{ .Values.ingress.host }}
+      secretName: {{ .Values.ingress.tlsSecret }}
+  rules:
+    - host: {{ .Values.ingress.host }}
+      http:
+        paths:
+          - path: /api(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: {{ .Values.backend.name }}
+                port:
+                  number: 80
+          - path: /()(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: {{ .Values.frontend.name }}
+                port:
+                  number: {{ .Values.frontend.port }}
