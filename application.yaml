@@ -17,7 +17,7 @@ spec:
     name: in-cluster           # тот же кластер, где стоит ArgoCD
     namespace: default         # namespace приложения
   source:
-    repoURL: "https://github.com/ВАШ_ЛОГИН/devops-gitops.git"
+    repoURL: "https://github.com/alexwebx/devops-gitops.git"
     targetRevision: HEAD
     path: "helm/myapp"
     helm:

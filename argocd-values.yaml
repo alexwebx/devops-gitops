@@ -6,7 +6,7 @@
 #  - сервисный аккаунт github-actions (для CI: argocd app sync)
 #  - server за ingress-nginx с TLS (cert-manager)
 #
-# ЗАПОЛНИ: argocd.ВАШ_ДОМЕН.
+# ЗАПОЛНИ: argocd.alexwebx.ru.
 # ⚠️  Версия чарта и точные ключи ingress валидируются на живом прогоне (см. 00-design.md).
 
 applicationSet:
@@ -142,7 +142,7 @@ server:
   ingress:
     enabled: true
     ingressClassName: nginx
-    hostname: argocd.ВАШ_ДОМЕН
+    hostname: argocd.alexwebx.ru
     annotations:
       cert-manager.io/cluster-issuer: letsencrypt-prod
       nginx.ingress.kubernetes.io/backend-protocol: HTTP
